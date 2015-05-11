@@ -36,7 +36,7 @@ app.post('/users/',function(req,res){
             console.log(err);
             res.end(err);
 	}
-	if(user.length > 0)
+	if(user)
 	    res.json({message: 'User already exists'});
 	else{
 	    var user=new User();
