@@ -174,5 +174,33 @@ app.post('/event/:code/guests',function(req,res){
 	});
     }
 });
+
+app.get('/events', function(req, res){
+	Event.where('eventType').equals('public').exec(function(err, events){
+		if(err)
+			res.json({message:"Error fetching the users"});
+		res.json(events);
+	});
+});
+
+app.get('/allevents', function(req, res){
+	Event.find(function(err, events){
+		if(err)
+			res.json({message:"Error fetching the users"});
+		res.json(events);
+	});
+});
+
+app.get('/events/:code', function(req,res){
+
+	Event.findOne({ $and:[ {ezCode: req.params.code}, {eventType: "public"} ]}, function(err,event){
+		if(err)
+			res.json({message:"cannot get events/:code"});
+		res.json(event);
+	});
+
+});
+
+
 app.listen(port);
 console.log("Server running on port "+port);
