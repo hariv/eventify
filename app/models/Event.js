@@ -6,9 +6,13 @@ var eventSchema=mongoose.Schema({
 	latitude: Number,
 	longitude: Number
     },
-    date: Date,
+    date: {
+    start: Date,
+    end: Date
+    },
     owner: Number,
-    guests: [Number]
+    guests: [Number],
+    eventType: {type: String, default:"public"}
 });
 var Event=mongoose.model('Event', eventSchema);
 module.exports=Event;
