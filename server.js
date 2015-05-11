@@ -27,9 +27,9 @@ app.get('/users/:handle',function(req,res){
     });
 });
 app.post('/users/',function(req,res){
-    var handle=req.params.handle;
-    var password=req.params.password;
-    var name=req.params.name;
+    var handle=req.body.handle;
+    var password=req.body.password;
+    var name=req.body.name;
     User.findOne({handle: handle},function(err,user){
 	if(err){
 	    console.log("Error querying users for POST /users");

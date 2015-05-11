@@ -1,0 +1,27 @@
+{
+  "name": "eventifyapp",
+  "version": "1.0.0",
+  "description": "REST server for eventify app",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shivkanthb/eventify-1.git"
+  },
+  "author": "shiv&Hari",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shivkanthb/eventify-1/issues"
+  },
+  "homepage": "https://github.com/shivkanthb/eventify-1",
+  "dependencies": {
+    "body-parser": "^1.12.3",
+    "express": "^4.12.3",
+    "express-session": "^1.11.1",
+    "mongodb": "^2.0.31",
+    "mongoose": "^4.0.2"
+  }
+}
