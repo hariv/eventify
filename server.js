@@ -63,7 +63,9 @@ app.post('/events',function(req,res){
 	    event.name=req.body.name;
             event.location.latitude=req.body.latitude;
             event.location.longitude=req.body.longitude;
-            event.location.time=req.body.time;
+            event.date.start=req.body.start; 
+    event.date.end=req.body.end;
+    event.eventType=req.body.eventType;
 	    event.owner=response;
 	    event.save(function(err){
 		if(err){
@@ -95,7 +97,9 @@ app.put('/events/:code',function(req,res){
 		    event.name=req.body.name;
                     event.location.latitude=req.body.latitude;
                     event.location.longitude=req.body.longitude;
-                    event.location.time=req.body.time;
+                    event.date.start=req.body.start; 
+    				event.date.end=req.body.end;
+    				event.eventType=req.body.eventType;
 		    event.save(function(error){
                         if(error){
                             console.log("Error updating event for PUT /events/:code");
