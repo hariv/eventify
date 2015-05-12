@@ -53,6 +53,35 @@ app.post('/users/',function(req,res){
 	});
     });
 });
+app.post('/login',function(req,res){
+    if(!req.session.userId){
+	var handle=req.body.handle;
+	var password=req.body.password;
+	User.findOne({ $and:[ {handle: handle}, {password: password} ]},function(err,user){
+	    if(err){
+		console.log("Error authenticating user for POST /login");
+		console.log(err);
+		res.send(err);
+	    }
+	    if(user){
+		req.session.userId=user._id;
+		res.json({message: "Authentication success"});
+	    }
+	    else
+		res.json({message: "Authentication failure"});
+	});
+    }
+    else
+	res.json({message: "Already logged in"});
+});
+app.post('/logout',function(req,res){
+    if(req.session.userId){
+	req.session.userId=null;
+	req.json({message: "Logout successful"});
+    }
+    else
+	res.json({message: "Already logged out"});
+});
 app.post('/events',function(req,res){
     if(req.session.userId){
 	var event=new Event();
@@ -64,8 +93,8 @@ app.post('/events',function(req,res){
             event.location.latitude=req.body.latitude;
             event.location.longitude=req.body.longitude;
             event.date.start=req.body.start; 
-    event.date.end=req.body.end;
-    event.eventType=req.body.eventType;
+	    event.date.end=req.body.end;
+	    event.eventType=req.body.eventType;
 	    event.owner=response;
 	    event.save(function(err){
 		if(err){
