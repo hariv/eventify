@@ -178,6 +178,42 @@ app.post('/event/:code/guests',function(req,res){
 	});
     }
 });
+app.delete('/event/:code/guests',function(req,res){
+    var code=req.params.code;
+    var deleteHandle=req.body.handle;
+    if(req.session.userId){
+	var userId=req.session.userId;
+	Event.findOne({ezCode: code},function(err,event){
+	    if(err){
+		console.log("Error fetching event for DELETE /event/:code/guests");
+		console.log(err);
+		res.send(err);
+	    }
+	    if(deleteHandle==event.owner)
+		res.json({message: "Owner can't delete himself"});
+	    util.getUserHandle(userId,function(response){
+		if(!response)
+		    res.json({message: "Error fetching user handle"});
+		if(deleteHandle==response || deleteHandle==event.owner){
+		    var deleteIndex=event.guests.indexOf();
+		    if(deleteIndex==-1)
+			res.json({message: "User you are trying to remove is not part of the event"});
+		    event.guests.splice(deleteIndex,1);
+		}
+		event.save(function(saveError){
+		    if(saveError){
+			console.log("Error deleting user from event for DELETE /event/:code/guests");
+			console.log(saveError);
+			res.send(saveError);
+		    }
+		    res.json({message: "Successfully removed guest"});
+		});
+	    });
+	});
+    }
+    else
+	res.json({message: "Unauthorized"});
+});
 app.get('/events', function(req, res){
     Event.where('eventType').equals('public').exec(function(err, events){
 	if(err){
