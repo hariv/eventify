@@ -178,33 +178,55 @@ app.post('/event/:code/guests',function(req,res){
 	});
     }
 });
-
 app.get('/events', function(req, res){
-	Event.where('eventType').equals('public').exec(function(err, events){
-		if(err)
-			res.json({message:"Error fetching the users"});
-		res.json(events);
-	});
+    Event.where('eventType').equals('public').exec(function(err, events){
+	if(err){
+	    console.log("Error fetching all events for GET /events");
+	    console.log(err);
+	    res.send(err);
+	}
+	res.json(events);
+    });
 });
-
 app.get('/allevents', function(req, res){
-	Event.find(function(err, events){
-		if(err)
-			res.json({message:"Error fetching the users"});
-		res.json(events);
-	});
+    Event.find(function(err, events){
+	if(err){
+	    console.log("Error fetching events for GET /allevents");
+	    console.log(err);
+	    res.send(err);
+	}
+	res.json(events);
+    });
 });
-
 app.get('/events/:code', function(req,res){
-
-	Event.findOne({ $and:[ {ezCode: req.params.code}, {eventType: "public"} ]}, function(err,event){
-		if(err)
-			res.json({message:"cannot get events/:code"});
-		res.json(event);
-	});
-
+    Event.findOne({ $and:[ {ezCode: req.params.code}, {eventType: "public"} ]}, function(err,event){
+	if(err){
+	    console.log("Error fetching event for GET /events/:code");
+	    console.log(err);
+	    res.send(err);
+	}
+	res.json(event);
+    });
 });
-
+app.get('/events/:code/guests',function(req,res){
+    var code=req.params.code;
+    Event.findOne({ezCode: code},function(err,event){
+	if(err){
+	    console.log("Error finding event for GET /events/:code/guests");
+	    console.log(err);
+	    res.send(err);
+	}
+	var guests=event.guests;
+	util.getAllUsers(guests,function(response){
+	    if(!response){
+		res.send("Error getting user details for /events/:code/guests");
+		console.log(err);
+		res.send(err);
+	    }
+	    res.json(response);
+	});
+    });
+});
 
 app.listen(port);
 console.log("Server running on port "+port);
