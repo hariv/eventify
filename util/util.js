@@ -1,6 +1,13 @@
 var Event=require('../app/models/Event');
 var User=require('../app/models/User');
 var guestsArray=new Array();
+var generateCode=function(size){
+    var text="";
+    var possible="0123456789";
+    for(var i=0;i<size;i++)
+        text+=possible.charAt(Math.floor(Math.random() * possible.length));
+    return text;
+}
 var getUserHandle=function(userId,callback){
     User.findOne({_id: userId},function(err,user){
 	if(err){
