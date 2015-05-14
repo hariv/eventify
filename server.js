@@ -82,27 +82,105 @@ app.post('/logout',function(req,res){
     else
 	res.json({message: "Already logged out"});
 });
+app.delete('/cronEvents',function(req,res){
+    if(req.body.secret){
+	var secret=req.body.secret;
+	if(secret=="!Q2w3e$R"){
+	    var 
+	}
+    }
+});
 app.post('/events',function(req,res){
     if(req.session.userId){
-	var event=new Event();
 	var userId=req.session.userId;
+	var eventsArray=new Array();
+	var codeCount=new Array(8).join('0').split('').map(parseFloat);
 	util.getUserHandle(userId,function(response){
 	    if(!response)
 		res.send("Error fetching user handle");
-	    event.name=req.body.name;
-            event.location.latitude=req.body.latitude;
-            event.location.longitude=req.body.longitude;
-            event.date.start=req.body.start; 
-	    event.date.end=req.body.end;
-	    event.eventType=req.body.eventType;
-	    event.owner=response;
-	    event.save(function(err){
-		if(err){
-		    console.log("Error inserting event for POST /events");
-                    console.log(err);
-                    res.send(err);
+	    Event.find({},function(error,events){
+		if(error){
+		    console.log("Error in fetching all events");
+		    console.log(error);
+		    res.send(error);
 		}
-		res.json({message: 'Event Created'});
+		for(var i=0;i<events.length;i++){
+		    eventsArray.push(events[i].ezCode);
+		    codeCount[events[i].ezCode-4]++;
+		}
+		var event=new Event();
+		event.name=req.body.name;
+		event.location.latitude=req.body.latitude;
+		event.location.longitude=req.body.longitude;
+		event.date.start=req.body.start;
+		event.date.end=req.body.end;
+		event.eventType=req.body.eventType;
+		event.owner=response;
+		var now=new Date().getTime()/1000;
+		var timeRemaining=req.body.start.getTime()/1000-now;
+		var requiredLength;
+		var index;
+		var baseNum;
+		if(timeRemaining<604800){
+		    index=0;
+		    baseNum=9000;
+		    while(index<7){
+			if(codeCount[index]<baseNum){
+			    requiredLength=4;
+			    break;
+			}
+			else{
+			    index++;
+			    baseNum*=10;
+			}
+		    }
+		}
+		else if(timeRemaining<1029600){
+		    index=2;
+		    baseNum=900000;
+		    while(index<7){
+			if(codeCount[index]<baseNum){
+			    requiredLength=6;
+			    break;
+			}
+			else{
+			    index++;
+			    baseNum*=10;
+			}
+		    }
+		}
+		else if(timeRemaining<2419200){
+		    index=4;
+		    baseNum=90000000;
+		    while(index<7){
+			if(codeCount[index]<baseNum){
+			    requiredLength=8;
+			    break;
+			}
+			else{
+			    index++;
+			    baseNum*=10;
+			}
+		    }
+		}
+		else
+		    requiredLength=10;
+		var generatedCode=false;
+		var ezCode;
+		while(!generatedCode){
+		    ezCode=util.generateCode(requiredLength);
+		    if(eventsArray.indexOf(ezCode)==-1)
+			generatedCode=true;
+		}
+		event.ezCode=ezCode;
+		event.save(function(err){
+		    if(err){
+			console.log("Error inserting event for POST /events");
+			console.log(err);
+			res.send(err);
+		    }
+		    res.json({message: 'Event Created'});
+		});
 	    });
 	});
     }
