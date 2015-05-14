@@ -83,22 +83,17 @@ app.post('/logout',function(req,res){
 	res.json({message: "Already logged out"});
 });
 app.delete('/cronEvents',function(req,res){
-    if(req.body.secret){
-	var secret=req.body.secret;
-	if(secret=="!Q2w3e$R"){
-	    var now=new Date();
-	    var query=Event.find({});
-	    query.where('date.end').lt(now).exec(function(err,events){
-		if(err){
-		    console.log("Error fetching events for DELETE /cronEvents");
-		    console.log(err);
-		    res.send(err);
-		}
-		events.remove.exec();
-		res.json({message: "Cron execution successful"});
-	    });
+    var now=new Date();
+    var query=Event.find({});
+    query.where('date.end').lt(now).exec(function(err,events){
+	if(err){
+	    console.log("Error fetching events for DELETE /cronEvents");
+	    console.log(err);
+	    res.send(err);
 	}
-    }
+	events.remove.exec();
+	res.json({message: "Cron execution successful"});
+    });
 });
 app.post('/events',function(req,res){
     if(req.session.userId){
@@ -211,20 +206,29 @@ app.put('/events/:code',function(req,res){
 		if(!response)
 		    res.send("Error fetching user handle");
 		if(event.owner==response){
-		    event.name=req.body.name;
-                    event.location.latitude=req.body.latitude;
-                    event.location.longitude=req.body.longitude;
-                    event.date.start=req.body.start; 
-    		    event.date.end=req.body.end;
-    		    event.eventType=req.body.eventType;
-		    event.save(function(error){
-                        if(error){
-                            console.log("Error updating event for PUT /events/:code");
-                            console.log(error);
-                            res.end(error);
-                        }
-                        res.json({message: 'Event Updated'});
-                    });
+		    var oldEventId=event._id;
+		    var updatedEvent=new Event();
+		    updatedEvent.name=req.body.name;
+                    updatedEvent.location.latitude=req.body.latitude;
+                    updatedEvent.location.longitude=req.body.longitude;
+                    updatedEvent.date.start=req.body.start; 
+    		    updatedEvent.date.end=req.body.end;
+    		    updatedEvent.eventType=req.body.eventType;
+		    Event.remove({_id: oldEventId},function(error,evt){
+			if(error){
+			    console.log("Error deleting event for PUT /events/:code");
+			    console.log(error);
+			    res.send(error);
+			}
+			updatedEvent.save(function(error){
+			    if(error){
+				console.log("Error creating event for PUT /events/:code");
+				console.log(error);
+				res.send(error);
+			    }
+			    res.json({message: 'Event updated'});
+			});
+		    });
 		}
 		else
 		    res.json({message :'Unauthorized'});
@@ -312,18 +316,36 @@ app.delete('/event/:code/guests',function(req,res){
 		if(!response)
 		    res.json({message: "Error fetching user handle"});
 		if(deleteHandle==response || deleteHandle==event.owner){
-		    var deleteIndex=event.guests.indexOf();
+		    var deleteIndex=event.guests.indexOf(deleteHandle);
+		    var deleteId=event._id;
 		    if(deleteIndex==-1)
 			res.json({message: "User you are trying to remove is not part of the event"});
 		    event.guests.splice(deleteIndex,1);
 		}
-		event.save(function(saveError){
-		    if(saveError){
-			console.log("Error deleting user from event for DELETE /event/:code/guests");
-			console.log(saveError);
-			res.send(saveError);
+		var updatedEvent=new Event();
+		updatedEvent.name=event.name;
+		updatedEvent.ezCode=event.ezCode;
+		updatedEvent.location.latitude=event.location.latitude;
+		updatedEvent.location.longitude=event.location.longitude;
+		updatedEvent.date.start=event.date.start;
+		updatedEvent.date.end=event.date.end;
+		updatedEvent.owner=event.owner;
+		updatedEvent.guests=event.guests;
+		updatedEvent.eventType=event.eventType;
+		Event.remove({_id: deleteId},function(error,evt){
+		    if(error){
+			console.log("Error deleting event for DELETE /events/:code/guests");
+			console.log(error);
+			res.send(error);
 		    }
-		    res.json({message: "Successfully removed guest"});
+		    updatedEvent.save(function(saveError){
+			if(saveError){
+			    console.log("Error saving event for DELETE /events/:code/guests");
+			    console.log(saveError);
+			    res.end(saveError);
+			}
+			res.json({message: "Successfully removed guest"});
+		    });
 		});
 	    });
 	});

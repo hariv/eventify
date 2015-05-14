@@ -7,8 +7,8 @@ var eventSchema=mongoose.Schema({
 	longitude: Number
     },
     date: {
-    start: Date,
-    end: Date
+	start: Date,
+	end: Date
     },
     owner: Number,
     guests: [Number],
