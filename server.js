@@ -86,7 +86,17 @@ app.delete('/cronEvents',function(req,res){
     if(req.body.secret){
 	var secret=req.body.secret;
 	if(secret=="!Q2w3e$R"){
-	    var 
+	    var now=new Date();
+	    var query=Event.find({});
+	    query.where('date.end').lt(now).exec(function(err,events){
+		if(err){
+		    console.log("Error fetching events for DELETE /cronEvents");
+		    console.log(err);
+		    res.send(err);
+		}
+		events.remove.exec();
+		res.json({message: "Cron execution successful"});
+	    });
 	}
     }
 });
@@ -205,8 +215,8 @@ app.put('/events/:code',function(req,res){
                     event.location.latitude=req.body.latitude;
                     event.location.longitude=req.body.longitude;
                     event.date.start=req.body.start; 
-    				event.date.end=req.body.end;
-    				event.eventType=req.body.eventType;
+    		    event.date.end=req.body.end;
+    		    event.eventType=req.body.eventType;
 		    event.save(function(error){
                         if(error){
                             console.log("Error updating event for PUT /events/:code");
