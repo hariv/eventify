@@ -44,3 +44,6 @@ var getUser=function(handle,callback){
     });
 }
 exports.getUserHandle=getUserHandle;
+exports.getUser=getUser;
+exports.getAllUsers=getAllUsers;
+exports.generateCode=generateCode;
