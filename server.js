@@ -386,14 +386,9 @@ app.get('/allevents', function(req, res){
 	    }
 	});
     }
-    Event.find(function(err, events){
-	if(err){
-	    console.log("Error fetching events for GET /allevents");
-	    console.log(err);
-	    res.send(err);
-	}
-	res.json(events);
-    });
+    else
+	res.json({message: "Unauthorized"});
+    
 });
 app.get('/events/:code', function(req,res){
     Event.findOne({ $and:[ {ezCode: req.params.code}, {eventType: "public"} ]}, function(err,event){
