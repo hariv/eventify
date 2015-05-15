@@ -263,12 +263,12 @@ app.delete('/events/:code',function(req,res){
                     });
 		}
 		else
-		    res.json({message: 'Unauthorized'});
+		    res.json({message: 'Unauthorized koothi'});
 	    });
 	});
     }
     else
-	res.json({message: 'Unauthorized'});
+	res.json({message: 'Unauthorized punda'});
 });
 app.post('/event/:code/guests',function(req,res){
     var code=req.params.code;

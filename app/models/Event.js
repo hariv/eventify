@@ -12,6 +12,8 @@ var eventSchema=mongoose.Schema({
     },
     owner: Number,
     guests: [Number],
+    description: String,
+    address: String,
     eventType: {type: String, default:"public"}
 });
 var Event=mongoose.model('Event', eventSchema);
