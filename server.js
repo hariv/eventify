@@ -369,26 +369,38 @@ app.get('/allevents', function(req, res){
 	util.getUserHandle(userId,function(response){
 	    if(!response)
 		res.send("Error fetching user handle");
-	    Event.where('owner').equals(response).exec(function(err,evts)){
-		if(err){
-		    console.log("Error fetching events for GET /allevents");
-		    console.log(err);
-		    res.send(err);
+	    Event.find({ $and:[ {owner: handle}, {eventType: "private"} ]},function(myError,myEvents){
+		if(myError){
+		    console.log("Error fetching my events for GET /allevents");
+		    console.log(myError);
+		    res.send(myError);
 		}
 		var eventsArray=evts;
-		Event.find({},function(error,events){
-		    for(var i=0;i<events.length;i++){
-			if(events[i].guests.indexOf(response)!=-1)
-			    eventsArray.push(events[i]);
+		Event.where('eventType').equals("private").exec(function(privateError,privateEvents){
+		    if(privateError){
+			console.log("Error fetching private events for GET /allevents");
+			console.log(privateError);
+			res.send(privateError);
 		    }
-		    res.json(eventsArray);
+		    for(var i=0;i<privateEvents.length;i++){
+			if(privateEvents.guests.indexOf(response)!=-1)
+			    eventsArray.push(privateEvents[i]);
+		    }
+		    Event.where('eventType').equals("public").exec(function(publicError,publicEvents){
+			if(publicError){
+			    console.log("Error fetching public events for GET /allevents");
+			    console.log(publicError);
+			    res.send(publicError);
+			}
+			eventsArray.concat(publicEvents);
+			res.json(publicEvents);
+		    });
 		});
-	    }
+	    });
 	});
     }
     else
 	res.json({message: "Unauthorized"});
-    
 });
 app.get('/events/:code', function(req,res){
     Event.findOne({ $and:[ {ezCode: req.params.code}, {eventType: "public"} ]}, function(err,event){
