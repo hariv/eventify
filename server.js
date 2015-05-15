@@ -282,7 +282,7 @@ app.post('/event/:code/guests',function(req,res){
 	    }
 	    util.getUserHandle(userId,event,function(response){
 		if(!response)
-		    res.json({message: "Error in fetching user"});
+		    res.send("Error fetching user handle");
 		if(event.owner==response || event.guests.indexOf(response)==-1){
 		    event.guests.push(response);
 		    event.save(function(error){
@@ -314,7 +314,7 @@ app.delete('/event/:code/guests',function(req,res){
 		res.json({message: "Owner can't delete himself"});
 	    util.getUserHandle(userId,function(response){
 		if(!response)
-		    res.json({message: "Error fetching user handle"});
+		    res.send("Error fetching user handle");
 		if(deleteHandle==response || deleteHandle==event.owner){
 		    var deleteIndex=event.guests.indexOf(deleteHandle);
 		    var deleteId=event._id;
@@ -364,6 +364,28 @@ app.get('/events', function(req, res){
     });
 });
 app.get('/allevents', function(req, res){
+    if(req.session.userId){
+	var userId=req.session.userId;
+	util.getUserHandle(userId,function(response){
+	    if(!response)
+		res.send("Error fetching user handle");
+	    Event.where('owner').equals(response).exec(function(err,evts)){
+		if(err){
+		    console.log("Error fetching events for GET /allevents");
+		    console.log(err);
+		    res.send(err);
+		}
+		var eventsArray=evts;
+		Event.find({},function(error,events){
+		    for(var i=0;i<events.length;i++){
+			if(events[i].guests.indexOf(response)!=-1)
+			    eventsArray.push(events[i]);
+		    }
+		    res.json(eventsArray);
+		});
+	    }
+	});
+    }
     Event.find(function(err, events){
 	if(err){
 	    console.log("Error fetching events for GET /allevents");
@@ -395,8 +417,6 @@ app.get('/events/:code/guests',function(req,res){
 	util.getAllUsers(guests,function(response){
 	    if(!response){
 		res.send("Error getting user details for /events/:code/guests");
-		console.log(err);
-		res.send(err);
 	    }
 	    res.json(response);
 	});
