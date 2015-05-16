@@ -120,6 +120,8 @@ app.post('/events',function(req,res){
 		event.date.start=req.body.start;
 		event.date.end=req.body.end;
 		event.eventType=req.body.eventType;
+		event.description=req.body.description;
+		event.address=req.body.address;
 		event.owner=response;
 		var now=new Date().getTime()/1000;
 		var timeRemaining=req.body.start.getTime()/1000-now;
@@ -214,6 +216,8 @@ app.put('/events/:code',function(req,res){
                     updatedEvent.date.start=req.body.start; 
     		    updatedEvent.date.end=req.body.end;
     		    updatedEvent.eventType=req.body.eventType;
+    		    updatedEvent.description=req.body.description;
+    		    updatedEvent.address=req.body.address;
 		    Event.remove({_id: oldEventId},function(error,evt){
 			if(error){
 			    console.log("Error deleting event for PUT /events/:code");
